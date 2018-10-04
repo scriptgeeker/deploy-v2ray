@@ -1,4 +1,4 @@
-# Shadowsocks 一键部署脚本
+# V2ray Shadowsocks 一键部署脚本
 
 ## 适用环境
 
@@ -8,41 +8,69 @@
 
 ## 关于脚本
 
--   本脚本已在 Vultr 上的 VPS 测试通过，VPS 的虚拟方式为 KVM 架构
--   本脚本会自动安装 Python3（执行脚本） V2ray（代理服务） BBR（网络加速）
--   V2Ray 集成有 Shadowsocks 模块，脚本会自动配置 SS 参数，端口和密码随机生成
--   安装完成会重启系统，服务会自动启动，SS 订阅链接保存在 /root/v2ss.info 文件中
+-   本脚本已在 Vultr 上的 VPS 测试通过
+-   本脚本会自动安装 V2ray（代理服务） BBR（网络加速）
+-   脚本运行后不需要任何操作，安装完成后会自动重启系统，服务自动开启
+
+## 答疑解惑
+
+> 问：为什么用 V2ray 部署 Shadowsocks 服务 ？
+
+答：SS 使用的人多，客户端比较成熟，但服务端却很糟糕，甚至没有 v2 稳定性好。
+
+> 问：SS 服务是怎么配置的，配置参数是什么？
+
+答：端口和密码是随机的，加密方式为 aes-256-gcm，认证方式为 AEAD。
+
+> 问：BBR 是什么，有什么用 ？
+
+答：BBR 是谷歌开源的拥塞控制算法，可以使你的网速提升好几个数量级。
+
 
 ## 使用方法
 
-root 用户执行
-
-```shell
-wget https://raw.githubusercontent.com/scriptgeeker/deploy-v2ray/master/v2ss.py && chmod +x v2ss.py && ./v2ss.py
+安装 wget 下载工具
+```bash
+yum install -y wget
 ```
 
-查看订阅链接
+下载执行一键部署脚本
+```bash
+wget https://raw.githubusercontent.com/scriptgeeker/deploy-v2ray/master/v2ss.py && sudo python v2ss.py
+```
 
-```shell
-cat /root/v2ss.info
+查看服务端配置
+
+```bash
+cat /etc/v2ray/config.json
+```
+
+查看客户端配置
+```bash
+cat /etc/v2ray/client.json
+```
+
+查看SS订阅链接
+
+```bash
+cat /etc/v2ray/sslink.info
 ```
 
 ## 服务状态
 
-代理服务是否运行
+服务运行状态
 
-```shell
+```bash
 systemctl status v2ray.service
 ```
 
-防火墙是否关闭
+防火墙开放端口
 
-```shell
-systemctl status firewalld.service
+```bash
+firewall-cmd--zone=public --list-ports
 ```
 
-网络加速是否开启
-
-```shell
+网络控制器内核
+```bash
 sysctl net.ipv4.tcp_congestion_control
 ```
