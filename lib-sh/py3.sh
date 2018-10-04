@@ -199,9 +199,6 @@ install_python(){
     echo " Arch   : `uname -m`"
     echo " Kernel : `uname -r`"
     echo "--------------------------------------"
-    echo
-    echo "Press any key to start...or Press Ctrl+C to cancel"
-    # char=`get_char`
 
     depends_install
     install_start

@@ -66,7 +66,7 @@ systemctl status v2ray.service
 防火墙开放端口
 
 ```bash
-firewall-cmd--zone=public --list-ports
+firewall-cmd --zone=public --list-ports
 ```
 
 网络控制器内核

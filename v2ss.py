@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # Auto deploy V2ray shadowsocks
-# System Required:  CentOS 7
+# System Required:  CentOS 7 X64
 # Both PY2 and PY3 can run this script.
 
 import os
@@ -17,14 +17,27 @@ import subprocess
 
 # install V2ray
 GET_V2RAY = [
-    'wget https://raw.githubusercontent.com/scriptgeeker/deploy-v2ray/master/lib-sh/v2ray.sh',
-    'sudo chmod +x v2ray.sh && ./v2ray.sh',
+    "yum -y install zip unzip",
+    "wget https://github.com/v2ray/v2ray-core/releases/download/v3.45/v2ray-linux-64.zip",
+    "unzip v2ray-linux-64.zip",
+    "mv './v2ray-v3.45-linux-64' '/usr/bin/v2ray'",
+    "cp '/usr/bin/v2ray/systemd/v2ray.service' '/etc/systemd/system/'",
+    "ln -s '/etc/systemd/system/v2ray.service' '/etc/systemd/system/multi-user.target.wants/v2ray.service'",
+    "mkdir -p /etc/v2ray",
+    "cp '/usr/bin/v2ray/vpoint_socks_vmess.json' '/etc/v2ray/config.json'",
+    "systemctl enable v2ray.service",
 ]
 
-# install TCP BBR
-GET_BBR_TCP = [
-    'wget https://raw.githubusercontent.com/scriptgeeker/deploy-v2ray/master/lib-sh/bbr.sh',
-    'sudo chmod +x bbr.sh && ./bbr.sh',
+GET_BBR = [
+    "cat '/etc/redhat-release'",
+    "rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org",
+    "rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm",
+    "yum --enablerepo=elrepo-kernel -y install kernel-ml",
+    "grub2-set-default 0",
+    "yum -y remove kernel kernel-tools",
+    "echo 'net.core.default_qdisc = fq' >> '/etc/sysctl.conf'",
+    "echo 'net.ipv4.tcp_congestion_control = bbr' >> '/etc/sysctl.conf'",
+    "sysctl -p",
 ]
 
 # client SS config
@@ -42,6 +55,11 @@ SERVER_CONFIG = {
 
 # -------------- install and config V2ray ----------------- #
 
+def exec_shell(cmds):
+    for cmd in cmds:
+        subprocess.call(cmd, shell=True)
+
+
 def random_string(size=8, chars=string.ascii_letters):
     randstr = ''
     for i in range(size):
@@ -55,8 +73,7 @@ def get_ip_addr(pattern):
 
 
 os.chdir('/tmp')
-for cmd in GET_V2RAY:
-    subprocess.call(cmd, shell=True)
+exec_shell(GET_V2RAY)
 
 ss_config = {
     'server_addr': get_ip_addr(r'inet ([0-9\.]+)\/\d+ brd'),
@@ -92,15 +109,10 @@ with open('/etc/v2ray/sslink.info', 'w') as fw:
 
 # -------------- install TCP BBR ----------------- #
 
-# Auto start v2ray service
-subprocess.call('sudo systemctl enable v2ray.service', shell=True)
-
 # Adding open ports for firewalls
 subprocess.call('firewall-cmd --zone=public --add-port=%d/tcp --permanent' % ss_config['server_port'], shell=True)
 
-os.chdir('/tmp')
-for cmd in GET_BBR_TCP:
-    subprocess.call(cmd, shell=True)
+exec_shell(GET_BBR)
 
 # Service enable after system restart
 subprocess.call('sudo shutdown -r now', shell=True)
