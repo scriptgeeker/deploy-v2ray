@@ -17,6 +17,7 @@ import subprocess
 
 # install V2ray
 GET_V2RAY = [
+    "rm -rf $(find / -name 'v2ray')",
     "yum -y install zip unzip",
     "wget https://github.com/v2ray/v2ray-core/releases/download/v3.45/v2ray-linux-64.zip",
     "unzip v2ray-linux-64.zip",
@@ -86,8 +87,12 @@ SERVER_CONFIG['inbound']['port'] = ss_config['server_port']
 SERVER_CONFIG['inbound']['settings']['method'] = ss_config['method']
 SERVER_CONFIG['inbound']['settings']['password'] = ss_config['password']
 
+ss_info = json.dumps(SERVER_CONFIG, sort_keys=True, indent=4)
+
 with open('/etc/v2ray/config.json', 'w') as fw:
-    fw.write(json.dumps(SERVER_CONFIG, sort_keys=True, indent=4))
+    fw.write(ss_info + '\n')
+with open('/etc/v2ray/server.json', 'w') as fw:
+    fw.write(ss_info + '\n')
 
 # -------------- Save client config info ----------------- #
 
