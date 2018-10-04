@@ -86,9 +86,9 @@ ss_rule = '{method}:{password}@{server_addr}:{server_port}'
 ss_link = 'ss://' + base64.b64encode(ss_rule.format(**ss_config).encode()).decode()
 
 with open('/etc/v2ray/client.json', 'w') as fw:
-    fw.write(ss_info)
+    fw.write(ss_info + '\n')
 with open('/etc/v2ray/sslink.info', 'w') as fw:
-    fw.write(ss_link)
+    fw.write(ss_link + '\n')
 
 # -------------- install TCP BBR ----------------- #
 
